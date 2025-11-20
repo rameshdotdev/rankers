@@ -16,7 +16,7 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const user = useSelector((state: any) => state.user.currentUser);
   if (!isOpen) return null;
-  if (!user) return null;
+  if (user) return null;
 
   const handleGoogleLogin = () => {
     setIsLoading(true);
