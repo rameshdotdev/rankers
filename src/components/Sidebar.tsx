@@ -19,8 +19,8 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`w-full md:w-20 lg:w-64 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex flex-row md:flex-col justify-between sticky top-[calc(100vh-4rem)] h-auto md:h-[calc(100vh-4rem)] z-30 overflow-x-auto md:overflow-visible scrollbar-hide transition-transform duration-300 ${
-        show ? "-translate-y-0" : "translate-y-full"
+      className={`w-full md:w-20 lg:w-64 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex flex-row md:flex-col justify-between sticky top-[calc(100vh-4rem)]  md:top-16 h-auto md:h-[calc(100vh-4rem)] z-30 overflow-x-auto md:overflow-visible scrollbar-hide transition-transform duration-300 ${
+        show ? "-translate-y-0" : "translate-y-full md:translate-y-0"
       }`}
     >
       <div className="p-2 md:p-4 flex flex-row md:flex-col gap-2 w-full md:w-auto justify-between md:justify-start">
