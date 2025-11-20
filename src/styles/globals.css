@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@config "../../tailwind.config.js";
+
+
+/* Custom Global Styles */
+
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: #09090b;
+}
+
+.dark ::-webkit-scrollbar-track {
+	background: #09090b;
+}
+
+:not(.dark) ::-webkit-scrollbar-track {
+	background: #f4f4f5;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #a1a1aa;
+	border-radius: 2px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+	background: #27272a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #10b981;
+}
+
+/* Scanline Animation */
+@keyframes scanline {
+	0% {
+		background-position: 0% 0%;
+	}
+
+	100% {
+		background-position: 0% 100%;
+	}
+}
+
+.scanlines {
+	background: linear-gradient(to bottom,
+			rgba(255, 255, 255, 0),
+			rgba(255, 255, 255, 0) 50%,
+			rgba(0, 0, 0, 0.2) 50%,
+			rgba(0, 0, 0, 0.2));
+	background-size: 100% 4px;
+	animation: scanline 0.2s linear infinite;
+	pointer-events: none;
+}
+
+/* Adjust scanlines for light mode */
+:not(.dark) .scanlines {
+	background: linear-gradient(to bottom,
+			rgba(0, 0, 0, 0),
+			rgba(0, 0, 0, 0) 50%,
+			rgba(0, 0, 0, 0.05) 50%,
+			rgba(0, 0, 0, 0.05));
+}
