@@ -24,7 +24,7 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({
     setTimeout(() => {
       setIsLoading(false);
       onLogin();
-    }, 2000);
+    }, 100);
   };
 
   return (

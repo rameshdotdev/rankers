@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { app } from "../app/firebase";
 import { setUser } from "@/feature/user/userSlice";
+import { useHideOnScroll } from "@/hooks/useHideOnScroll";
 
 export const Navbar: React.FC = () => {
   const dispatch = useDispatch();
@@ -25,6 +26,7 @@ export const Navbar: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const show = useHideOnScroll();
   const handleLogin = async () => {
     // console.log("Could not signin with google");
     const provider = new GoogleAuthProvider();
@@ -54,7 +56,11 @@ export const Navbar: React.FC = () => {
   };
   return (
     <>
-      <nav className="sticky top-0 z-40 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-black/70 backdrop-blur-md transition-colors duration-300">
+      <nav
+        className={`sticky top-0 z-40 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-black/70 backdrop-blur-md transition-colors duration-300 ${
+          show ? "translate-y-0" : "-translate-y-full"
+        } transition-transform duration-300`}
+      >
         <div className="max-w-8xl mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo Area */}
           <Link
