@@ -1,11 +1,9 @@
-import React from "react";
 import { ExamCard } from "../types";
 import {
   Lock,
   Activity,
   Users,
   FileText,
-  BookOpen,
   TrendingUp,
   Award,
 } from "lucide-react";

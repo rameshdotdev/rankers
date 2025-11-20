@@ -47,14 +47,14 @@ export const TerminalWidget: React.FC = () => {
     setLoading(false);
 
     // Add System Response Log
-    setLogs((prev) => [
-      ...prev,
-      {
-        type: "output",
-        content: response,
-        timestamp: new Date().toLocaleTimeString(),
-      },
-    ]);
+    // setLogs((prev) => [
+    //   ...prev,
+    //   {
+    //     type: "output",
+    //     // content: response,
+    //     timestamp: new Date().toLocaleTimeString(),
+    //   },
+    // ]);
   };
 
   return (

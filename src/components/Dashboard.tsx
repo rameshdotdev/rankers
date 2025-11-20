@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { User, ExamCard, RecommendedItem } from "../types";
 import {
   LayoutDashboard,
@@ -165,15 +165,14 @@ export const Dashboard = () => {
     "OVERVIEW" | "TARGETS" | "ANALYTICS"
   >("OVERVIEW");
 
-  const toggleExamSelection = (examId: string) => {
-    const currentExams = user.selectedExams || [];
-    let newExams;
-    if (currentExams.includes(examId)) {
-      newExams = currentExams.filter((id) => id !== examId);
-    } else {
-      newExams = [...currentExams, examId];
-    }
-  };
+  // const toggleExamSelection = () => {
+  //   // const currentExams = user.selectedExams || [];
+  //   // if (currentExams.includes(examId)) {
+  //   //   newExams = currentExams.filter((id) => id !== examId);
+  //   // } else {
+  //   //   newExams = [...currentExams, examId];
+  //   // }
+  // };
 
   // Filter recommendations based on user's selected exams
   const userRecommendations = RECOMMENDATIONS.filter((item) =>
@@ -301,7 +300,7 @@ export const Dashboard = () => {
                   return (
                     <div
                       key={exam.id}
-                      onClick={() => toggleExamSelection(exam.id)}
+                      // onClick={() => toggleExamSelection(exam.id)}
                       className={`
                       relative cursor-pointer group border rounded-sm p-4 md:p-6 transition-all duration-300
                       ${

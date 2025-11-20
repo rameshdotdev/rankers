@@ -6,7 +6,6 @@ import {
   Sun,
   Moon,
   LogIn,
-  User as UserIcon,
   LayoutDashboard,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
