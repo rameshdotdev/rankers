@@ -13,8 +13,6 @@ import {
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import DashboardLayout from "@/layouts/DashboardLayout";
-
 // Mock Data for Available Exams to Add
 const AVAILABLE_EXAMS: ExamCard[] = [
   {
@@ -183,7 +181,7 @@ export const Dashboard = () => {
     }
   }, [user, navigate]);
   return (
-    <DashboardLayout>
+    <div>
       {/* Header */}
       <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
         <div>
@@ -412,6 +410,6 @@ export const Dashboard = () => {
           </div>
         </div>
       )}
-    </DashboardLayout>
+    </div>
   );
 };

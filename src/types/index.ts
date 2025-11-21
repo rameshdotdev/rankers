@@ -59,3 +59,12 @@ export interface TestResult {
   accuracy: number; // Percentage
   timeTaken: number; // Seconds
 }
+
+export type TabType =
+  | "OVERVIEW"
+  | "TARGETS"
+  | "TEST_SERIES"
+  | "PYQ"
+  | "PRACTICE"
+  | "ANALYTICS"
+  | "SETTINGS";
