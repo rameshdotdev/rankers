@@ -15,12 +15,7 @@ import { LoginDialog } from "./LoginDialog";
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { app } from "../app/firebase";
 import { setUser } from "@/feature/user/userSlice";
-import {
-  useAppDispatch,
-  useAppSelector,
-  useDevice,
-  useHideOnScroll,
-} from "@/hooks/hooks";
+import { useAppDispatch, useAppSelector, useHideOnScroll } from "@/hooks/hooks";
 
 export const Navbar: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -32,13 +27,13 @@ export const Navbar: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { isDesktop } = useDevice();
+
   const show = useHideOnScroll();
 
   // Decide when to show/hide navbar based on route + device + scroll
   function shouldShowNavbar(): boolean {
     // Desktop & NOT homepage → always show
-    if (isDesktop) return true;
+    if (location.pathname === "/") return true;
     // Otherwise → follow scroll behavior
     return show;
   }
@@ -91,7 +86,7 @@ export const Navbar: React.FC = () => {
     <>
       <nav
         role="navigation"
-        className={`sticky top-0 z-40 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-black/70 backdrop-blur-md transition-colors transition-transform duration-300 ${
+        className={`sticky top-0 z-40 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-black/70 backdrop-blur-md transition-transform duration-300 ${
           shouldShowNavbar() ? "translate-y-0" : "-translate-y-full"
         }`}
       >
@@ -129,7 +124,7 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-4">
             {/* Online / Offline Indicator */}
             <div
-              className={`hidden sm:flex items-center gap-2 text-xs font-mono transition-colors ${
+              className={`flex items-center gap-2 text-xs font-mono transition-colors ${
                 isOnline ? "text-zinc-500" : "text-red-500"
               }`}
             >

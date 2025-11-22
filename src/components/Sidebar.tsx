@@ -9,7 +9,6 @@ import {
   LayoutDashboard,
   LogOut,
   Settings,
-  UserCircle,
 } from "lucide-react";
 
 import SidebarItem from "./SidebarItem";
@@ -118,7 +117,7 @@ export default function Sidebar() {
         ))}
 
         {/* SETTINGS tab as the last "tab" in the sequence for keyboard navigation */}
-        <button
+        {/* <button
           type="button"
           role="tab"
           aria-selected={activeTab === "SETTINGS"}
@@ -136,7 +135,7 @@ export default function Sidebar() {
         >
           <UserCircle className="w-4 h-4 shrink-0" />
           <span className="lg:inline font-mono text-sm">CONFIG</span>
-        </button>
+        </button> */}
 
         {/* Mobile Logout (not part of tablist) */}
         <button
