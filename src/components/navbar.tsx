@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Terminal,
   Search,
@@ -7,66 +7,97 @@ import {
   Moon,
   LogIn,
   LayoutDashboard,
+  WifiOff,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/app/store";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toggleTheme } from "@/feature/theme/themeSlice";
 import { LoginDialog } from "./LoginDialog";
-import { useNavigate } from "react-router-dom";
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { app } from "../app/firebase";
 import { setUser } from "@/feature/user/userSlice";
-import { useHideOnScroll } from "@/hooks/useHideOnScroll";
+import {
+  useAppDispatch,
+  useAppSelector,
+  useDevice,
+  useHideOnScroll,
+} from "@/hooks/hooks";
 
 export const Navbar: React.FC = () => {
-  const dispatch = useDispatch();
-  const isDark = useSelector((state: RootState) => state.theme.isDark);
-  const user = useSelector((state: RootState) => state.user.currentUser);
+  const dispatch = useAppDispatch();
+  const isDark = useAppSelector((state) => state.theme.isDark);
+  const user = useAppSelector((state) => state.user.currentUser);
+
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
+
   const navigate = useNavigate();
   const location = useLocation();
+  const { isDesktop } = useDevice();
   const show = useHideOnScroll();
+
+  // Decide when to show/hide navbar based on route + device + scroll
+  function shouldShowNavbar(): boolean {
+    // Desktop & NOT homepage → always show
+    if (isDesktop) return true;
+    // Otherwise → follow scroll behavior
+    return show;
+  }
+
+  // Online / offline status tracking
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
   const handleLogin = async () => {
-    // console.log("Could not signin with google");
-    const provider = new GoogleAuthProvider();
-    const auth = getAuth(app);
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-    if (!user) {
-      console.error("No user object returned from Firebase Auth");
-      return;
-    }
-
-    dispatch(
-      setUser({
-        id: user.uid,
-        name: user.displayName || "",
-        email: user.email || "",
-        avatar: user.photoURL || "",
-        selectedExams: [],
-      })
-    );
-
-    navigate("/dashboard");
     try {
+      const provider = new GoogleAuthProvider();
+      const auth = getAuth(app);
+
+      const result = await signInWithPopup(auth, provider);
+      const fbUser = result.user;
+
+      if (!fbUser) {
+        console.error("No user object returned from Firebase Auth");
+        return;
+      }
+
+      dispatch(
+        setUser({
+          id: fbUser.uid,
+          name: fbUser.displayName || "",
+          email: fbUser.email || "",
+          avatar: fbUser.photoURL || "",
+          selectedExams: [],
+        })
+      );
+
+      setIsLoginOpen(false);
+      navigate("/dashboard");
     } catch (error) {
-      console.log("Could not signin with google", error);
+      console.error("Could not sign in with Google", error);
     }
   };
+
   return (
     <>
       <nav
-        className={`sticky top-0 z-40 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-black/70 backdrop-blur-md transition-colors duration-300 ${
-          show ? "translate-y-0" : "-translate-y-full"
-        } transition-transform duration-300`}
+        role="navigation"
+        className={`sticky top-0 z-40 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-black/70 backdrop-blur-md transition-colors transition-transform duration-300 ${
+          shouldShowNavbar() ? "translate-y-0" : "-translate-y-full"
+        }`}
       >
         <div className="max-w-8xl mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo Area */}
-          <Link
-            className="flex items-center gap-3 cursor-pointer group"
-            to={"/"}
-          >
+          <Link className="flex items-center gap-3 cursor-pointer group" to="/">
             <div className="p-2 bg-zinc-100 dark:bg-zinc-900 rounded-sm border border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/50 transition-colors">
               <Terminal className="w-5 h-5 text-emerald-600 dark:text-emerald-500" />
             </div>
@@ -96,18 +127,33 @@ export const Navbar: React.FC = () => {
 
           {/* Status Indicators & Theme Switcher */}
           <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-zinc-500">
-              <Wifi className="w-4 h-4 text-emerald-600 dark:text-emerald-500" />
-              <span className="hidden lg:inline">ONLINE</span>
+            {/* Online / Offline Indicator */}
+            <div
+              className={`hidden sm:flex items-center gap-2 text-xs font-mono transition-colors ${
+                isOnline ? "text-zinc-500" : "text-red-500"
+              }`}
+            >
+              {isOnline ? (
+                <>
+                  <Wifi className="w-4 h-4 text-emerald-600 dark:text-emerald-500" />
+                  <span className="hidden lg:inline">ONLINE</span>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="w-4 h-4 animate-pulse" />
+                  <span className="hidden lg:inline font-bold">OFFLINE</span>
+                </>
+              )}
             </div>
 
-            <div className="h-4 w-[1px] bg-zinc-300 dark:bg-zinc-800"></div>
+            <div className="h-4 w-[1px] bg-zinc-300 dark:bg-zinc-800" />
 
             {/* Theme Toggle */}
             <button
               onClick={() => dispatch(toggleTheme())}
               className="p-2 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-500 transition-colors"
               title="Toggle Visual Mode"
+              type="button"
             >
               {isDark ? (
                 <Sun className="w-4 h-4" />
@@ -118,11 +164,11 @@ export const Navbar: React.FC = () => {
 
             {/* User Profile / Login */}
             <div className="flex items-center gap-2">
-              {/* {console.log(location.)} */}
-              {user && location.pathname == "/dashboard" && (
+              {/* Logged-in user on /dashboard → show avatar & info, click goes home */}
+              {user && location.pathname === "/dashboard" && (
                 <Link
                   className="flex items-center gap-3 pl-2 cursor-pointer hover:opacity-80 transition-opacity"
-                  to={"/"}
+                  to="/"
                 >
                   <div className="text-right hidden sm:block">
                     <div className="text-xs font-bold text-zinc-900 dark:text-white">
@@ -140,24 +186,22 @@ export const Navbar: React.FC = () => {
                   />
                 </Link>
               )}
+
+              {/* Not logged in → show login button */}
               {!user && (
-                <>
-                  <button
-                    onClick={() => {
-                      setIsLoginOpen(!isLoginOpen);
-                    }}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-bold hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-colors shadow-lg"
-                  >
-                    <LogIn className="w-3 h-3" />
-                    <span>LOGIN</span>
-                  </button>
-                </>
-              )}
-              {user && location.pathname == "/" && (
-                <Link
-                  className="flex items-center gap-3 pl-2 cursor-pointer hover:opacity-80 transition-opacity"
-                  to={"/"}
+                <button
+                  type="button"
+                  onClick={() => setIsLoginOpen(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-bold hover:bg-emerald-600 dark:hover:bg-emerald-400 transition-colors shadow-lg"
                 >
+                  <LogIn className="w-3 h-3" />
+                  <span>LOGIN</span>
+                </button>
+              )}
+
+              {/* Logged-in user on home ("/") → show info + dashboard shortcut */}
+              {user && location.pathname === "/" && (
+                <div className="flex items-center gap-3 pl-2">
                   <div className="text-right hidden sm:block">
                     <div className="text-xs font-bold text-zinc-900 dark:text-white">
                       {user.name}
@@ -172,19 +216,18 @@ export const Navbar: React.FC = () => {
                   >
                     <LayoutDashboard className="w-4 h-4" />
                   </Link>
-                </Link>
+                </div>
               )}
             </div>
           </div>
         </div>
       </nav>
-      {
-        <LoginDialog
-          isOpen={isLoginOpen}
-          onClose={() => setIsLoginOpen(false)}
-          onLogin={handleLogin}
-        />
-      }
+
+      <LoginDialog
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        onLogin={handleLogin}
+      />
     </>
   );
 };

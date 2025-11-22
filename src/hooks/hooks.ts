@@ -1,4 +1,37 @@
+import { AppDispatch, RootState } from "@/app/store";
 import { useEffect, useRef, useState } from "react";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+
+export const useDevice = () => {
+  const [size, setSize] = useState({
+    width: 0,
+    isMobile: false,
+    isTablet: false,
+    isDesktop: true,
+  });
+
+  useEffect(() => {
+    const update = () => {
+      const width = window.innerWidth;
+
+      setSize({
+        width,
+        isMobile: width < 640,
+        isTablet: width >= 640 && width < 1024,
+        isDesktop: width >= 1024,
+      });
+    };
+
+    update(); // set initial value
+    window.addEventListener("resize", update);
+
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  return size;
+};
 
 export const useHideOnScroll = (offset: number = 80) => {
   const [show, setShow] = useState(true);

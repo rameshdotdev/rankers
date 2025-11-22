@@ -11,7 +11,11 @@ export default function Home() {
     <DashboardLayout>
       {activeTab === "OVERVIEW" && <Dashboard />}
       {activeTab === "SETTINGS" && <Settings />}
-      {activeTab === "TEST_SERIES" && <TestSeries />}
+      {activeTab === "TEST_SERIES" && (
+        <>
+          <TestSeries />
+        </>
+      )}
     </DashboardLayout>
   );
 }

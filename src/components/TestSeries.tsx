@@ -11,6 +11,8 @@ import {
   Timer,
   Filter,
   TrendingUp,
+  BarChart3,
+  Bookmark,
 } from "lucide-react";
 
 // --- MOCK DATA ---
@@ -361,6 +363,58 @@ export const TestSeries: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+      {/* 2.5 Value Proposition Section */}
+      <section className="py-6 md:py-10">
+        <h2 className="text-lg md:text-xl font-mono font-bold text-zinc-900 dark:text-zinc-100 mb-8 text-center">
+          Why choose Rankers Test Series?
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Card 1 */}
+          <div className="flex flex-col items-center text-center p-8 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-sm shadow-sm hover:shadow-md hover:border-emerald-500/30 transition-all group">
+            <div className="w-20 h-20 rounded-2xl bg-emerald-50 dark:bg-emerald-900/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 relative">
+              <div className="absolute top-0 right-0 bg-rose-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg rounded-tr-lg uppercase tracking-wider animate-pulse">
+                New
+              </div>
+              <FileText className="w-10 h-10 text-emerald-600 dark:text-emerald-500" />
+            </div>
+            <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-3">
+              Latest Exam Patterns
+            </h3>
+            <p className="text-sm text-zinc-500 font-mono leading-relaxed">
+              Prepare for the level expected in the upcoming exams with updated
+              pattern simulations.
+            </p>
+          </div>
+
+          {/* Card 2 */}
+          <div className="flex flex-col items-center text-center p-8 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-sm shadow-sm hover:shadow-md hover:border-indigo-500/30 transition-all group">
+            <div className="w-20 h-20 rounded-2xl bg-indigo-50 dark:bg-indigo-900/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Bookmark className="w-10 h-10 text-indigo-600 dark:text-indigo-500" />
+            </div>
+            <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-3">
+              Save Tests & Questions
+            </h3>
+            <p className="text-sm text-zinc-500 font-mono leading-relaxed">
+              Bookmark important questions and save full mock tests to revise or
+              reattempt them later.
+            </p>
+          </div>
+
+          {/* Card 3 */}
+          <div className="flex flex-col items-center text-center p-8 bg-amber-50/50 dark:bg-amber-950/10 border border-zinc-200 dark:border-zinc-800 rounded-sm shadow-sm hover:shadow-md hover:border-amber-500/30 transition-all group">
+            <div className="w-20 h-20 rounded-2xl bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <BarChart3 className="w-10 h-10 text-amber-600 dark:text-amber-500" />
+            </div>
+            <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-3">
+              In-depth Analysis
+            </h3>
+            <p className="text-sm text-zinc-500 font-mono leading-relaxed">
+              Get insights on your Strengths & Weaknesses, All India Rank &
+              Performance Comparison.
+            </p>
+          </div>
         </div>
       </section>
       {/* 3. Browse Categories Section */}
