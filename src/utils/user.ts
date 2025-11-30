@@ -1,7 +1,6 @@
-import { useSelector } from "react-redux";
-import { RootState } from "@/app/store";
 import { User } from "@/types";
+import { useAppSelector } from "@/hooks/hooks";
 
 export const getUser = () => {
-  return useSelector((state: RootState) => state.user.currentUser) as User;
+  return useAppSelector((store) => store.user.currentUser) as User;
 };

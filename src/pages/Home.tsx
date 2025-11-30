@@ -5,6 +5,7 @@ import { Dashboard } from "./Dashboard";
 import { Settings } from "./Settings";
 import { TestSeries } from "@/components/TestSeries";
 import { ComingSoon } from "./ComingSoon";
+import { PYQList } from "./PyqList";
 
 export default function Home() {
   const activeTab = useSelector(selectActiveTab);
@@ -13,7 +14,7 @@ export default function Home() {
       {activeTab === "OVERVIEW" && <Dashboard />}
       {activeTab === "SETTINGS" && <Settings />}
       {activeTab === "TEST_SERIES" && <TestSeries />}
-      {activeTab === "PYQ" && <ComingSoon title="PYQ" />}
+      {activeTab === "PYQ" && <PYQList />}
       {activeTab === "ANALYTICS" && <ComingSoon title="ANALYTICS" />}
     </DashboardLayout>
   );

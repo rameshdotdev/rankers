@@ -15,7 +15,12 @@ import { LoginDialog } from "./LoginDialog";
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
 import { app } from "../app/firebase";
 import { setUser } from "@/feature/user/userSlice";
-import { useAppDispatch, useAppSelector, useHideOnScroll } from "@/hooks/hooks";
+import {
+  useAppDispatch,
+  useAppSelector,
+  useDevice,
+  useHideOnScroll,
+} from "@/hooks/hooks";
 
 export const Navbar: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -27,13 +32,15 @@ export const Navbar: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-
+  const { isDesktop } = useDevice();
   const show = useHideOnScroll();
 
   // Decide when to show/hide navbar based on route + device + scroll
   function shouldShowNavbar(): boolean {
-    // Desktop & NOT homepage → always show
+    // Homepage → always show
     if (location.pathname === "/") return true;
+    // Desktop & NOT homepage → always show
+    if (isDesktop && location.pathname !== "/") return true;
     // Otherwise → follow scroll behavior
     return show;
   }

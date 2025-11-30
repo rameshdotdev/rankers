@@ -60,6 +60,26 @@ export interface TestResult {
   timeTaken: number; // Seconds
 }
 
+export enum QuestionStatus {
+  NOT_VISITED = "NOT_VISITED",
+  NOT_ANSWERED = "NOT_ANSWERED",
+  ANSWERED = "ANSWERED",
+  MARKED_FOR_REVIEW = "MARKED_FOR_REVIEW",
+  ANSWERED_AND_MARKED = "ANSWERED_AND_MARKED",
+}
+
+export interface Question {
+  id: string;
+  text: string;
+  options: string[];
+  correctIndex: number;
+  section: string;
+  type?: "MCQ" | "COMPREHENSION";
+  passage?: string;
+  positiveMarks: number;
+  negativeMarks: number;
+}
+
 export type TabType =
   | "OVERVIEW"
   | "TARGETS"

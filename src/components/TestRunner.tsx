@@ -1,350 +1,712 @@
-import React, { useState, useEffect } from 'react';
-import { Clock, Flag, CheckCircle, ChevronRight, ChevronLeft, XOctagon, Sun, Moon, Menu, X } from 'lucide-react';
-import { TestResult } from '../types';
+import React, { useState, useEffect } from "react";
+import {
+  ChevronRight,
+  ChevronLeft,
+  User as UserIcon,
+  Info,
+  Maximize2,
+  Minimize2,
+  PauseCircle,
+  PlayCircle,
+  AlertTriangle,
+  LogOut,
+} from "lucide-react";
+import { Question, QuestionStatus } from "../types";
 
-interface TestRunnerProps {
-  onExit: () => void;
-  onComplete: (result: TestResult) => void;
-  isDark?: boolean;
-  toggleTheme?: () => void;
-}
+// interface TestRunnerProps {
+//   onExit: () => void;
+//   onComplete: (result: TestResult) => void;
+// }
 
-const MOCK_QUESTIONS = [
-  { 
-    id: 'q1', 
-    text: 'GENERAL KNOWLEDGE: Which Article of the Indian Constitution deals with the "Abolition of Untouchability"?', 
-    options: ['Article 16', 'Article 17', 'Article 18', 'Article 23'], 
-    correct: 1 
+// --- MOCK DATA FOR SECTIONS ---
+const SECTIONS = [
+  "Language (Part-I)",
+  "General Studies (Part-II)",
+  "Computer Science (Part-III)",
+];
+
+const MOCK_QUESTIONS: Question[] = [
+  // SECTION 1: LANGUAGE
+  {
+    id: "q1",
+    section: SECTIONS[0],
+    type: "COMPREHENSION",
+    passage:
+      "Kerala is just the place for you if you love variety. There is something here to please everyone. You are sure to fall in love with the serene beauty of Kerala's magical backwaters. When you have experienced that, you can sample the excitement of Kerala's bustling cities or retreat into the villages to see at first-hand how time can stand still. Better still, take a trip to the spice gardens in the hills, to inhale the fragrance of fresh cardamoms if that makes your tastebuds tingle.",
+    text: "Why would foreign bargain-hunter visitors never face a problem in Kerala?",
+    options: [
+      "Many foreign languages are spoken in Kerala",
+      "Hindi is the language of communication in the cities of kerala.",
+      "English is spoken and understood everywhere in Kerala.",
+      "More than one of the above",
+      "None of the above",
+    ],
+    correctIndex: 2,
+    positiveMarks: 1,
+    negativeMarks: 0,
   },
-  { 
-    id: 'q2', 
-    text: 'QUANTITATIVE APTITUDE: If x + 1/x = 2, then find the value of x^100 + 1/x^100.', 
-    options: ['0', '1', '2', '100'], 
-    correct: 2 
+  {
+    id: "q2",
+    section: SECTIONS[0],
+    text: 'Choose the correct antonym for the word: "Fragrance"',
+    options: ["Aroma", "Stench", "Scent", "Perfume", "None of the above"],
+    correctIndex: 1,
+    positiveMarks: 1,
+    negativeMarks: 0,
   },
-  { 
-    id: 'q3', 
-    text: 'GENERAL SCIENCE: Which cell organelle is known as the "Powerhouse of the Cell"?', 
-    options: ['Nucleus', 'Ribosome', 'Mitochondria', 'Lysosome'], 
-    correct: 2 
+
+  // SECTION 2: GENERAL STUDIES
+  {
+    id: "q3",
+    section: SECTIONS[1],
+    text: 'Which Article of the Indian Constitution deals with the "Abolition of Untouchability"?',
+    options: [
+      "Article 16",
+      "Article 17",
+      "Article 18",
+      "More than one of the above",
+      "None of the above",
+    ],
+    correctIndex: 1,
+    positiveMarks: 1,
+    negativeMarks: 0,
   },
-  { 
-    id: 'q4', 
-    text: 'CURRENT AFFAIRS: Who is the current Chief of Defence Staff (CDS) of India?', 
-    options: ['Gen. Anil Chauhan', 'Gen. Bipin Rawat', 'Gen. MM Naravane', 'Adm. R Hari Kumar'], 
-    correct: 0 
+  {
+    id: "q4",
+    section: SECTIONS[1],
+    text: "Who is the current Chief of Defence Staff (CDS) of India?",
+    options: [
+      "Gen. Anil Chauhan",
+      "Gen. Bipin Rawat",
+      "Gen. MM Naravane",
+      "More than one of the above",
+      "None of the above",
+    ],
+    correctIndex: 0,
+    positiveMarks: 1,
+    negativeMarks: 0,
   },
-  { 
-    id: 'q5', 
-    text: 'REASONING: Look at this series: 2, 1, (1/2), (1/4), ... What number should come next?', 
-    options: ['(1/3)', '(1/8)', '(2/8)', '(1/16)'], 
-    correct: 1 
+
+  // SECTION 3: COMPUTER SCIENCE
+  {
+    id: "q5",
+    section: SECTIONS[2],
+    text: "Which of the following is NOT a valid access modifier in Java?",
+    options: ["public", "protected", "friend", "private", "None of the above"],
+    correctIndex: 2,
+    positiveMarks: 1,
+    negativeMarks: 0,
+  },
+  {
+    id: "q6",
+    section: SECTIONS[2],
+    text: "What is the time complexity of Binary Search?",
+    options: ["O(n)", "O(n^2)", "O(log n)", "O(1)", "None of the above"],
+    correctIndex: 2,
+    positiveMarks: 1,
+    negativeMarks: 0,
   },
 ];
 
-export const TestRunner: React.FC<TestRunnerProps> = ({ onExit, onComplete, isDark, toggleTheme }) => {
+export const TestRunner: React.FC = () => {
+  const [currentSection, setCurrentSection] = useState(SECTIONS[0]);
   const [currentQIndex, setCurrentQIndex] = useState(0);
-  const [selectedOptions, setSelectedOptions] = useState<{[key: string]: number}>({});
-  const [timeLeft, setTimeLeft] = useState(3600); // 60 minutes for a real mock feel
-  const [flagged, setFlagged] = useState<string[]>([]);
-  const [startTime] = useState(Date.now());
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  // Timer Logic
+  // Map Question ID to Status
+  const [questionStatus, setQuestionStatus] = useState<{
+    [key: string]: QuestionStatus;
+  }>({});
+  const [answers, setAnswers] = useState<{ [key: string]: number }>({});
+  const [timeLeft, setTimeLeft] = useState(9000); // 150 mins
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // Feature States
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Filter questions for current section
+  const sectionQuestions = MOCK_QUESTIONS.filter(
+    (q) => q.section === currentSection
+  );
+  const activeQuestion = sectionQuestions[currentQIndex];
+
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          handleSubmit(); // Auto submit
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
+    // Initialize all as NOT_VISITED
+    const initialStatus: { [key: string]: QuestionStatus } = {};
+    MOCK_QUESTIONS.forEach((q) => {
+      initialStatus[q.id] = QuestionStatus.NOT_VISITED;
+    });
+    setQuestionStatus(initialStatus);
+
+    // Fullscreen change listener
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
   }, []);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const isCriticalTime = timeLeft < 300; // Less than 5 mins
-
-  const handleOptionSelect = (optIndex: number) => {
-    setSelectedOptions(prev => ({...prev, [MOCK_QUESTIONS[currentQIndex].id]: optIndex}));
-  };
-
-  const toggleFlag = () => {
-    const qId = MOCK_QUESTIONS[currentQIndex].id;
-    setFlagged(prev => prev.includes(qId) ? prev.filter(id => id !== qId) : [...prev, qId]);
-  };
-
-  const handleSubmit = () => {
-    const endTime = Date.now();
-    const timeTakenInSeconds = Math.floor((endTime - startTime) / 1000);
-    
-    let correctCount = 0;
-    let wrongCount = 0;
-    let unattemptedCount = 0;
-
-    MOCK_QUESTIONS.forEach(q => {
-      const userChoice = selectedOptions[q.id];
-      if (userChoice === undefined) {
-        unattemptedCount++;
-      } else if (userChoice === q.correct) {
-        correctCount++;
-      } else {
-        wrongCount++;
+  // Timer Logic with Pause check
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!isPaused) {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            handleSubmit();
+            return 0;
+          }
+          return prev - 1;
+        });
       }
-    });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isPaused]);
 
-    const totalQuestions = MOCK_QUESTIONS.length;
-    // Simple percentage score
-    const score = Math.round((correctCount / totalQuestions) * 100);
-    // Accuracy: Correct / Attempted
-    const attempted = correctCount + wrongCount;
-    const accuracy = attempted === 0 ? 0 : (correctCount / attempted) * 100;
+  // Update status to NOT_ANSWERED when visiting if it was NOT_VISITED
+  useEffect(() => {
+    if (activeQuestion && !isPaused) {
+      setQuestionStatus((prev) => {
+        if (prev[activeQuestion.id] === QuestionStatus.NOT_VISITED) {
+          return { ...prev, [activeQuestion.id]: QuestionStatus.NOT_ANSWERED };
+        }
+        return prev;
+      });
+    }
+  }, [activeQuestion, isPaused]);
 
-    const result: TestResult = {
-      totalQuestions,
-      correctAnswers: correctCount,
-      wrongAnswers: wrongCount,
-      unattempted: unattemptedCount,
-      score,
-      accuracy,
-      timeTaken: timeTakenInSeconds
-    };
-
-    onComplete(result);
-  };
-
-  const handleAbort = () => {
-    if (window.confirm("WARNING: ABORTING SIMULATION WILL FORFEIT PROGRESS. CONFIRM?")) {
-      onExit();
+  // --- FEATURES ---
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((e) => {
+        console.error(
+          `Error attempting to enable fullscreen mode: ${e.message} (${e.name})`
+        );
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
     }
   };
 
-  const PaletteContent = () => (
-    <>
-      <h3 className="font-mono text-xs text-zinc-500 mb-4 tracking-widest uppercase">Question Palette</h3>
-      <div className="grid grid-cols-5 md:grid-cols-4 gap-2">
-        {MOCK_QUESTIONS.map((q, idx) => {
-          const isAnswered = selectedOptions[q.id] !== undefined;
-          const isFlagged = flagged.includes(q.id);
-          const isCurrent = idx === currentQIndex;
-          
-          let bgClass = 'bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-500';
-          if (isCurrent) bgClass = 'ring-1 ring-emerald-500 text-emerald-600 dark:text-emerald-500 bg-zinc-50 dark:bg-zinc-900';
-          else if (isFlagged) bgClass = 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-600 text-yellow-600 dark:text-yellow-500';
-          else if (isAnswered) bgClass = 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-600 text-emerald-600 dark:text-emerald-500';
+  const togglePause = () => {
+    setIsPaused(!isPaused);
+  };
 
-          return (
-            <button
-              key={q.id}
-              onClick={() => {
-                setCurrentQIndex(idx);
-                setIsMobileSidebarOpen(false);
-              }}
-              className={`
-                h-10 w-10 rounded-sm border flex items-center justify-center font-mono text-sm transition-all
-                ${bgClass}
-              `}
-            >
-              {idx + 1}
-            </button>
-          );
-        })}
-      </div>
-      
-      <div className="mt-8 space-y-2">
-        <div className="flex items-center gap-2 text-xs font-mono text-zinc-500">
-          <div className="w-3 h-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-600"></div> Answered
-        </div>
-        <div className="flex items-center gap-2 text-xs font-mono text-zinc-500">
-          <div className="w-3 h-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-600"></div> Mark for Review
-        </div>
-        <div className="flex items-center gap-2 text-xs font-mono text-zinc-500">
-          <div className="w-3 h-3 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"></div> Not Visited
-        </div>
-      </div>
-    </>
-  );
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours.toString().padStart(2, "0")} : ${mins.toString().padStart(2, "0")} : ${secs.toString().padStart(2, "0")}`;
+  };
+
+  const handleOptionSelect = (optIndex: number) => {
+    setAnswers((prev) => ({ ...prev, [activeQuestion.id]: optIndex }));
+  };
+
+  const handleSaveAndNext = () => {
+    if (answers[activeQuestion.id] !== undefined) {
+      setQuestionStatus((prev) => ({
+        ...prev,
+        [activeQuestion.id]: QuestionStatus.ANSWERED,
+      }));
+    } else {
+      setQuestionStatus((prev) => ({
+        ...prev,
+        [activeQuestion.id]: QuestionStatus.NOT_ANSWERED,
+      }));
+    }
+    moveToNext();
+  };
+
+  const handleMarkReviewAndNext = () => {
+    if (answers[activeQuestion.id] !== undefined) {
+      setQuestionStatus((prev) => ({
+        ...prev,
+        [activeQuestion.id]: QuestionStatus.ANSWERED_AND_MARKED,
+      }));
+    } else {
+      setQuestionStatus((prev) => ({
+        ...prev,
+        [activeQuestion.id]: QuestionStatus.MARKED_FOR_REVIEW,
+      }));
+    }
+    moveToNext();
+  };
+
+  const handleClearResponse = () => {
+    const newAnswers = { ...answers };
+    delete newAnswers[activeQuestion.id];
+    setAnswers(newAnswers);
+    setQuestionStatus((prev) => ({
+      ...prev,
+      [activeQuestion.id]: QuestionStatus.NOT_ANSWERED,
+    }));
+  };
+
+  const moveToNext = () => {
+    if (currentQIndex < sectionQuestions.length - 1) {
+      setCurrentQIndex(currentQIndex + 1);
+    } else {
+      // Try to move to next section
+      const currSecIdx = SECTIONS.indexOf(currentSection);
+      if (currSecIdx < SECTIONS.length - 1) {
+        if (
+          confirm(
+            `You have reached the end of ${currentSection}. Proceed to ${SECTIONS[currSecIdx + 1]}?`
+          )
+        ) {
+          setCurrentSection(SECTIONS[currSecIdx + 1]);
+          setCurrentQIndex(0);
+        }
+      }
+    }
+  };
+
+  const handleSubmit = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch((err) => console.log(err));
+    }
+
+    let correct = 0;
+    let wrong = 0;
+    let unattempted = 0;
+
+    MOCK_QUESTIONS.forEach((q) => {
+      const ans = answers[q.id];
+      if (ans === undefined) {
+        unattempted++;
+      } else if (ans === q.correctIndex) {
+        correct++;
+      } else {
+        wrong++;
+      }
+    });
+
+    // onComplete({
+    //   totalQuestions: MOCK_QUESTIONS.length,
+    //   correctAnswers: correct,
+    //   wrongAnswers: wrong,
+    //   unattempted,
+    //   score: Math.round((correct / MOCK_QUESTIONS.length) * 100),
+    //   accuracy: correct + wrong > 0 ? (correct / (correct + wrong)) * 100 : 0,
+    //   timeTaken: 9000 - timeLeft,
+    // });
+  };
+
+  const getStatusColor = (status: QuestionStatus) => {
+    switch (status) {
+      case QuestionStatus.ANSWERED:
+        return "bg-emerald-500 text-white clip-path-polygon-flat";
+      case QuestionStatus.NOT_ANSWERED:
+        return "bg-red-500 text-white clip-path-polygon-flat";
+      case QuestionStatus.MARKED_FOR_REVIEW:
+        return "bg-purple-600 text-white rounded-full";
+      case QuestionStatus.ANSWERED_AND_MARKED:
+        return 'bg-purple-600 text-white rounded-full relative after:content-[""] after:absolute after:bottom-0 after:right-0 after:w-2 after:h-2 after:bg-green-500 after:rounded-full after:border after:border-white';
+      default:
+        return "bg-zinc-100 dark:bg-zinc-800 text-black dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700 rounded-sm";
+    }
+  };
+
+  const stats = {
+    answered: Object.values(questionStatus).filter(
+      (s) => s === QuestionStatus.ANSWERED
+    ).length,
+    notAnswered: Object.values(questionStatus).filter(
+      (s) => s === QuestionStatus.NOT_ANSWERED
+    ).length,
+    notVisited: Object.values(questionStatus).filter(
+      (s) => s === QuestionStatus.NOT_VISITED
+    ).length,
+    marked: Object.values(questionStatus).filter(
+      (s) => s === QuestionStatus.MARKED_FOR_REVIEW
+    ).length,
+    ansMarked: Object.values(questionStatus).filter(
+      (s) => s === QuestionStatus.ANSWERED_AND_MARKED
+    ).length,
+  };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black text-zinc-800 dark:text-zinc-300 flex flex-col relative overflow-hidden transition-colors duration-300">
-      {/* Green Grid Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,0,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none z-0"></div>
-
-      {/* Header / Status Bar */}
-      <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur flex items-center justify-between px-4 md:px-6 z-20 relative transition-colors duration-300">
-        <div className="flex items-center gap-2 md:gap-4">
-          {/* Mobile Menu Toggle */}
-          <button 
-            className="lg:hidden p-2 -ml-2 text-zinc-500"
-            onClick={() => setIsMobileSidebarOpen(true)}
-          >
-            <Menu className="w-6 h-6" />
-          </button>
-          
-          <div className="font-mono font-bold text-zinc-900 dark:text-zinc-100 tracking-widest text-xs md:text-base flex items-center gap-2">
-            <span className="hidden md:inline">MOCK_TEST:</span> 
-            <span className="text-emerald-600 dark:text-emerald-500 truncate max-w-[150px] md:max-w-none">GEN_AWARENESS_01</span>
+    <div className="flex flex-col h-screen bg-zinc-50 dark:bg-zinc-950 font-sans select-none relative">
+      {/* PAUSE OVERLAY */}
+      {isPaused && (
+        <div className="absolute inset-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-200">
+          <div className="p-8 text-center max-w-md">
+            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600 dark:text-emerald-500 animate-pulse">
+              <PauseCircle className="w-10 h-10" />
+            </div>
+            <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">
+              Test Paused
+            </h2>
+            <p className="text-zinc-500 dark:text-zinc-400 mb-8 font-mono">
+              The timer has been stopped. The questions are hidden.
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={togglePause}
+                className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 text-white font-bold rounded-sm hover:bg-emerald-500 transition-all shadow-lg hover:shadow-emerald-500/25"
+              >
+                <PlayCircle className="w-5 h-5" /> RESUME TEST
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-white dark:bg-zinc-900 text-red-500 font-bold rounded-sm border border-red-200 dark:border-red-900/30 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+              >
+                <LogOut className="w-5 h-5" /> SUBMIT & EXIT
+              </button>
+            </div>
           </div>
         </div>
-        
-        <div className={`
-          flex items-center gap-2 md:gap-3 font-mono text-sm md:text-xl font-bold px-2 md:px-4 py-1 rounded-sm border transition-colors duration-300
-          ${isCriticalTime 
-            ? 'text-red-600 dark:text-red-500 border-red-500/50 bg-red-50 dark:bg-red-950/20 animate-pulse' 
-            : 'text-emerald-600 dark:text-emerald-500 border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20'}
-        `}>
-          <Clock className="w-4 h-4 md:w-5 md:h-5" />
-          {formatTime(timeLeft)}
+      )}
+
+      {/* HEADER */}
+      <header className="h-14 bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 shrink-0 transition-colors duration-300">
+        <div className="flex items-center gap-3">
+          <div className="p-1.5 bg-zinc-900 text-white rounded-sm">
+            <Info className="w-4 h-4" />
+          </div>
+          <h1 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 hidden md:block">
+            Bihar शिक्षक TRE 3.0 (Class 11-12) (Computer Science) Official Paper
+          </h1>
+          <h1 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 md:hidden">
+            TRE 3.0 Official Paper
+          </h1>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4">
-           {toggleTheme && (
-            <button 
-              onClick={toggleTheme}
-              className="p-2 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-600 dark:text-zinc-400 transition-colors"
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-900 px-3 py-1.5 rounded-sm">
+            <span className="text-xs font-bold text-zinc-500">Time Left</span>
+            <span
+              className={`font-mono text-base font-bold px-2 rounded ${timeLeft < 300 ? "bg-red-100 text-red-600 animate-pulse" : "bg-zinc-200 dark:bg-black text-zinc-900 dark:text-white"}`}
             >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {formatTime(timeLeft)}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 border-l border-zinc-200 dark:border-zinc-800 pl-4">
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded text-zinc-500 hover:text-emerald-500 transition-colors"
+              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            >
+              {isFullscreen ? (
+                <Minimize2 className="w-4 h-4" />
+              ) : (
+                <Maximize2 className="w-4 h-4" />
+              )}
             </button>
-           )}
-          <button 
-            onClick={handleAbort}
-            className="flex items-center gap-2 text-[10px] md:text-xs font-mono text-zinc-500 hover:text-red-600 dark:hover:text-red-500 transition-colors uppercase tracking-wider"
-          >
-            <XOctagon className="w-4 h-4" />
-            <span className="hidden md:inline">Abort Exam</span>
-            <span className="inline md:hidden">Abort</span>
-          </button>
+            <button
+              onClick={togglePause}
+              className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded text-zinc-500 hover:text-emerald-500 transition-colors"
+              title="Pause / Minimize"
+            >
+              <PauseCircle className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Main Interface */}
-      <main className="flex-1 flex z-20 relative overflow-hidden">
-        
-        {/* Sidebar - Desktop */}
-        <aside className="w-64 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-4 hidden lg:block transition-colors duration-300 h-full overflow-y-auto">
-           <PaletteContent />
-        </aside>
+      {/* SUB-HEADER / SECTIONS */}
+      <div className="h-10 bg-blue-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 flex items-center px-4 overflow-x-auto scrollbar-hide shrink-0 transition-colors duration-300">
+        <span className="text-xs font-bold text-zinc-500 mr-4">SECTIONS |</span>
+        {SECTIONS.map((sec) => (
+          <button
+            key={sec}
+            onClick={() => {
+              setCurrentSection(sec);
+              setCurrentQIndex(0);
+            }}
+            className={`
+              h-full px-4 text-xs font-bold whitespace-nowrap border-b-2 transition-colors flex items-center
+              ${
+                currentSection === sec
+                  ? "border-blue-600 bg-blue-600 text-white"
+                  : "border-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+              }
+            `}
+          >
+            {sec}
+            {sec === currentSection && (
+              <Info className="w-3 h-3 ml-2 text-white/50" />
+            )}
+          </button>
+        ))}
+      </div>
 
-        {/* Sidebar - Mobile Drawer */}
-        {isMobileSidebarOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsMobileSidebarOpen(false)}></div>
-            <aside className="absolute left-0 top-0 bottom-0 w-3/4 max-w-sm bg-white dark:bg-black border-r border-zinc-200 dark:border-zinc-800 p-6 overflow-y-auto shadow-2xl animate-in slide-in-from-left duration-200">
-              <div className="flex justify-between items-center mb-6">
-                <span className="font-mono font-bold text-zinc-900 dark:text-white">NAVIGATION</span>
-                <button onClick={() => setIsMobileSidebarOpen(false)}>
-                  <X className="w-6 h-6 text-zinc-500" />
-                </button>
+      {/* MAIN BODY (SPLIT VIEW) */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* LEFT: QUESTION AREA */}
+        <main
+          className={`flex-1 flex flex-col h-full overflow-hidden transition-all ${isSidebarOpen ? "mr-0" : "mr-0"}`}
+        >
+          {/* Question Header Strip */}
+          <div className="h-12 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 bg-white dark:bg-zinc-950 shrink-0 transition-colors duration-300">
+            <div className="flex items-center gap-4">
+              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                Question No. {currentQIndex + 1}
+              </h2>
+              <div className="hidden sm:flex items-center gap-2">
+                {activeQuestion.type === "COMPREHENSION" && (
+                  <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded border border-purple-200">
+                    COMPREHENSION
+                  </span>
+                )}
               </div>
-              <PaletteContent />
-            </aside>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1 text-xs">
+                <span className="font-bold text-zinc-500">Marks</span>
+                <span className="bg-emerald-100 text-emerald-700 px-1.5 rounded text-[10px] font-bold">
+                  +{activeQuestion.positiveMarks}
+                </span>
+                <span className="bg-red-100 text-red-700 px-1.5 rounded text-[10px] font-bold">
+                  -{activeQuestion.negativeMarks}
+                </span>
+              </div>
+              <div className="text-xs text-zinc-500 flex items-center gap-1">
+                View in{" "}
+                <span className="font-bold text-zinc-900 dark:text-white border border-zinc-300 dark:border-zinc-700 px-1 rounded">
+                  English ▾
+                </span>
+              </div>
+              <button className="text-xs text-zinc-500 flex items-center gap-1 hover:text-red-500">
+                <AlertTriangle className="w-3 h-3" /> Report
+              </button>
+            </div>
           </div>
+
+          {/* Question Content */}
+          <div className="flex-1 overflow-y-auto bg-white dark:bg-black p-4 flex flex-col md:flex-row gap-4 transition-colors duration-300">
+            {/* Passage Panel (If Comprehension) */}
+            {activeQuestion.type === "COMPREHENSION" &&
+              activeQuestion.passage && (
+                <div className="md:w-1/2 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800 pr-0 md:pr-4 pb-4 md:pb-0">
+                  <h3 className="underline font-bold text-sm mb-3 text-zinc-800 dark:text-zinc-200">
+                    Comprehension:
+                  </h3>
+                  <p className="text-sm leading-relaxed text-zinc-800 dark:text-zinc-300 font-serif">
+                    {activeQuestion.passage}
+                  </p>
+                </div>
+              )}
+
+            {/* Question Panel */}
+            <div
+              className={`flex-1 ${activeQuestion.type === "COMPREHENSION" ? "" : "max-w-4xl mx-auto"}`}
+            >
+              <h3 className="font-bold underline text-sm mb-2 text-zinc-800 dark:text-zinc-200">
+                Question:
+              </h3>
+              <p className="text-base font-medium text-zinc-900 dark:text-zinc-100 mb-6 leading-relaxed">
+                {activeQuestion.text}
+              </p>
+
+              <div className="space-y-3">
+                {activeQuestion.options.map((opt, idx) => {
+                  const isSelected = answers[activeQuestion.id] === idx;
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => handleOptionSelect(idx)}
+                      className="flex items-start gap-3 cursor-pointer group"
+                    >
+                      <div
+                        className={`
+                          w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 transition-colors
+                          ${isSelected ? "border-blue-500" : "border-zinc-400 group-hover:border-blue-400"}
+                        `}
+                      >
+                        {isSelected && (
+                          <div className="w-2.5 h-2.5 bg-blue-500 rounded-full"></div>
+                        )}
+                      </div>
+                      <span
+                        className={`text-sm ${isSelected ? "text-zinc-900 dark:text-white font-medium" : "text-zinc-700 dark:text-zinc-400"}`}
+                      >
+                        {opt}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* FOOTER ACTIONS */}
+          <footer className="h-16 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 px-4 flex items-center justify-between shrink-0 transition-colors duration-300">
+            <div className="flex gap-2">
+              <button
+                onClick={handleMarkReviewAndNext}
+                className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-black text-xs font-bold text-zinc-700 dark:text-zinc-300 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                Mark for Review & Next
+              </button>
+              <button
+                onClick={handleClearResponse}
+                className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-black text-xs font-bold text-zinc-700 dark:text-zinc-300 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                Clear Response
+              </button>
+            </div>
+
+            <button
+              onClick={handleSaveAndNext}
+              className="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-sm hover:bg-blue-500 shadow-sm transition-colors"
+            >
+              Save & Next
+            </button>
+          </footer>
+        </main>
+
+        {/* RIGHT: PALETTE SIDEBAR */}
+        {isSidebarOpen && (
+          <aside className="w-80 bg-blue-50/50 dark:bg-zinc-900/50 border-l border-zinc-200 dark:border-zinc-800 flex flex-col shrink-0 overflow-hidden hidden lg:flex transition-colors duration-300">
+            {/* Profile Section */}
+            <div className="p-4 flex items-center gap-3 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+              <div className="w-10 h-10 rounded-full bg-cyan-500 flex items-center justify-center text-white">
+                <UserIcon className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
+                  Ramesh
+                </h3>
+                <p className="text-xs text-zinc-500">Candidate</p>
+              </div>
+            </div>
+
+            {/* Stats Grid */}
+            <div className="p-4 grid grid-cols-2 gap-y-3 gap-x-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 bg-emerald-500 text-white text-[10px] flex items-center justify-center rounded-sm font-bold clip-path-polygon-flat">
+                  {stats.answered}
+                </div>
+                <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-400">
+                  Answered
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-sm font-bold clip-path-polygon-flat">
+                  {stats.notAnswered}
+                </div>
+                <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-400">
+                  Not Answered
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 bg-zinc-100 border border-zinc-300 text-zinc-600 text-[10px] flex items-center justify-center rounded-sm font-bold">
+                  {stats.notVisited}
+                </div>
+                <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-400">
+                  Not Visited
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 bg-purple-600 text-white text-[10px] flex items-center justify-center rounded-full font-bold">
+                  {stats.marked}
+                </div>
+                <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-400">
+                  Marked for Review
+                </span>
+              </div>
+              <div className="flex items-center gap-2 col-span-2">
+                <div className="w-5 h-5 bg-purple-600 text-white text-[10px] flex items-center justify-center rounded-full font-bold relative after:content-[''] after:absolute after:bottom-0 after:right-0 after:w-1.5 after:h-1.5 after:bg-green-500 after:rounded-full after:border after:border-white">
+                  {stats.ansMarked}
+                </div>
+                <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-400 leading-tight">
+                  Answered & Marked for Review
+                </span>
+              </div>
+            </div>
+
+            {/* Palette Section Name */}
+            <div className="bg-blue-200 dark:bg-zinc-800 px-4 py-2 font-bold text-xs text-zinc-800 dark:text-zinc-200">
+              SECTION : {currentSection}
+            </div>
+
+            {/* Grid */}
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="grid grid-cols-5 gap-2">
+                {sectionQuestions.map((q, idx) => (
+                  <button
+                    key={q.id}
+                    onClick={() => setCurrentQIndex(idx)}
+                    className={`
+                        w-10 h-10 flex items-center justify-center text-sm font-bold shadow-sm transition-all rounded-sm
+                        ${getStatusColor(questionStatus[q.id])}
+                        ${currentQIndex === idx ? "ring-2 ring-offset-1 ring-blue-500" : ""}
+                      `}
+                  >
+                    {idx + 1}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Palette Footer */}
+            <div className="p-4 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 flex flex-col gap-2 transition-colors duration-300">
+              <button className="w-full py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-sm border border-blue-200 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-900/50">
+                Question Paper
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="w-full py-2 bg-emerald-500 text-white text-xs font-bold rounded-sm hover:bg-emerald-600 shadow-md transition-colors"
+              >
+                Submit Test
+              </button>
+            </div>
+          </aside>
         )}
 
-        {/* Question Area */}
-        <section className="flex-1 p-4 md:p-6 lg:p-12 overflow-y-auto">
-          <div className="max-w-3xl mx-auto pb-20">
-            
-            {/* Question Card */}
-            <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-sm p-1 shadow-lg dark:shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-colors duration-300">
-               {/* Card Header Strip */}
-               <div className="h-1 w-full bg-gradient-to-r from-emerald-500 to-transparent mb-4 md:mb-6"></div>
-               
-               <div className="px-4 md:px-6 pb-6 md:pb-8">
-                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
-                   <span className="font-mono text-emerald-600 dark:text-emerald-500 text-sm tracking-widest">Q_ID: {MOCK_QUESTIONS[currentQIndex].id.toUpperCase()}</span>
-                   <button 
-                      onClick={toggleFlag}
-                      className={`w-full sm:w-auto flex items-center justify-center gap-2 text-xs font-mono uppercase tracking-wider border px-3 py-2 rounded-sm transition-all
-                        ${flagged.includes(MOCK_QUESTIONS[currentQIndex].id) 
-                          ? 'border-yellow-500 text-yellow-600 dark:text-yellow-500 bg-yellow-50 dark:bg-yellow-500/10' 
-                          : 'border-zinc-300 dark:border-zinc-800 text-zinc-500 hover:border-zinc-400 dark:hover:border-zinc-600'}
-                      `}
-                   >
-                     <Flag className="w-3 h-3" />
-                     {flagged.includes(MOCK_QUESTIONS[currentQIndex].id) ? 'Marked' : 'Mark for Review'}
-                   </button>
-                 </div>
+        {/* Mobile Toggle for Palette */}
+        <div
+          className={`fixed right-0 top-1/2 -translate-y-1/2 z-50 lg:hidden transition-transform ${isSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
+        >
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="absolute -left-8 top-0 w-8 h-12 bg-blue-600 text-white flex items-center justify-center rounded-l-md shadow-lg"
+          >
+            {isSidebarOpen ? (
+              <ChevronRight size={20} />
+            ) : (
+              <ChevronLeft size={20} />
+            )}
+          </button>
 
-                 <h2 className="text-lg md:text-xl lg:text-2xl font-medium text-zinc-900 dark:text-zinc-100 mb-8 leading-relaxed transition-colors duration-300">
-                   {MOCK_QUESTIONS[currentQIndex].text}
-                 </h2>
-
-                 <div className="space-y-3 md:space-y-4">
-                   {MOCK_QUESTIONS[currentQIndex].options.map((option, idx) => {
-                     const isSelected = selectedOptions[MOCK_QUESTIONS[currentQIndex].id] === idx;
-                     return (
-                       <div 
-                        key={idx}
-                        onClick={() => handleOptionSelect(idx)}
-                        className={`
-                          relative p-3 md:p-4 border rounded-sm cursor-pointer transition-all group
-                          ${isSelected 
-                            ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-500 shadow-md dark:shadow-[0_0_10px_rgba(16,185,129,0.2)]' 
-                            : 'bg-zinc-50 dark:bg-black border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600'}
-                        `}
-                       >
-                         <div className="flex items-center gap-4">
-                           <div className={`
-                             w-5 h-5 rounded-full border flex items-center justify-center transition-colors shrink-0
-                             ${isSelected ? 'border-emerald-500 bg-emerald-500' : 'border-zinc-400 dark:border-zinc-600 group-hover:border-zinc-600 dark:group-hover:border-zinc-400'}
-                           `}>
-                             {isSelected && <div className="w-2 h-2 bg-white dark:bg-black rounded-full"></div>}
-                           </div>
-                           <span className={`font-sans text-sm ${isSelected ? 'text-zinc-900 dark:text-white' : 'text-zinc-600 dark:text-zinc-400'}`}>{option}</span>
-                         </div>
-                         {/* Decorative corner for selected */}
-                         {isSelected && (
-                           <div className="absolute top-0 right-0 w-0 h-0 border-t-[10px] border-r-[10px] border-t-transparent border-r-emerald-500"></div>
-                         )}
-                       </div>
-                     );
-                   })}
-                 </div>
-               </div>
+          {/* Mobile Drawer Content */}
+          <div className="w-72 h-[60vh] bg-white dark:bg-zinc-900 shadow-2xl border-l border-zinc-200 dark:border-zinc-800 overflow-y-auto flex flex-col">
+            <div className="p-4 font-bold border-b dark:border-zinc-800 dark:text-white">
+              Question Palette
             </div>
-
-            {/* Navigation Controls */}
-            <div className="mt-8 flex justify-between items-center">
-              <button 
-                onClick={() => setCurrentQIndex(Math.max(0, currentQIndex - 1))}
-                disabled={currentQIndex === 0}
-                className="flex items-center gap-2 px-4 md:px-6 py-3 border border-zinc-300 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 font-mono text-xs hover:bg-zinc-100 dark:hover:bg-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-sm"
-              >
-                <ChevronLeft className="w-4 h-4" /> <span className="hidden sm:inline">PREVIOUS</span>
-              </button>
-
-              {currentQIndex === MOCK_QUESTIONS.length - 1 ? (
-                 <button 
-                   onClick={() => {
-                     if (window.confirm("CONFIRM SUBMISSION: Are you sure you want to finish the exam?")) {
-                       handleSubmit();
-                     }
-                   }}
-                   className="flex items-center gap-2 px-6 md:px-8 py-3 bg-emerald-600 dark:bg-emerald-600 text-white dark:text-black font-mono font-bold text-xs hover:bg-emerald-500 transition-colors shadow-lg dark:shadow-[0_0_15px_rgba(16,185,129,0.4)] rounded-sm"
-                 >
-                   <CheckCircle className="w-4 h-4" /> SUBMIT_TEST
-                 </button>
-              ) : (
-                <button 
-                  onClick={() => setCurrentQIndex(Math.min(MOCK_QUESTIONS.length - 1, currentQIndex + 1))}
-                  className="flex items-center gap-2 px-4 md:px-6 py-3 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 font-mono text-xs hover:border-emerald-500/50 hover:text-emerald-600 dark:hover:text-emerald-500 transition-all rounded-sm"
+            <div className="p-4 grid grid-cols-5 gap-2 flex-1">
+              {sectionQuestions.map((q, idx) => (
+                <button
+                  key={q.id}
+                  onClick={() => {
+                    setCurrentQIndex(idx);
+                    setIsSidebarOpen(false);
+                  }}
+                  className={`w-10 h-10 flex items-center justify-center text-sm font-bold rounded-sm ${getStatusColor(questionStatus[q.id])}`}
                 >
-                  <span className="hidden sm:inline">NEXT</span> <ChevronRight className="w-4 h-4" />
+                  {idx + 1}
                 </button>
-              )}
+              ))}
             </div>
-
+            <div className="p-4 border-t dark:border-zinc-800">
+              <button
+                onClick={handleSubmit}
+                className="w-full bg-emerald-500 text-white py-2 rounded-sm font-bold"
+              >
+                Submit
+              </button>
+            </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </div>
     </div>
   );
 };
