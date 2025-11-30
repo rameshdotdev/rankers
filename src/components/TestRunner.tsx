@@ -10,6 +10,10 @@ import {
   PlayCircle,
   AlertTriangle,
   LogOut,
+  Clock,
+  Bookmark,
+  RotateCcw,
+  Save,
 } from "lucide-react";
 import { Question, QuestionStatus } from "../types";
 
@@ -331,30 +335,30 @@ export const TestRunner: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-50 dark:bg-zinc-950 font-sans select-none relative">
+    <div className="flex flex-col h-screen bg-zinc-50 dark:bg-zinc-950 font-sans select-none relative overflow-hidden">
       {/* PAUSE OVERLAY */}
       {isPaused && (
-        <div className="absolute inset-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-200">
-          <div className="p-8 text-center max-w-md">
-            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600 dark:text-emerald-500 animate-pulse">
-              <PauseCircle className="w-10 h-10" />
+        <div className="absolute inset-0 z-[100] bg-white/90 dark:bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-200 p-4">
+          <div className="p-8 text-center max-w-md w-full">
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600 dark:text-emerald-500 animate-pulse">
+              <PauseCircle className="w-8 h-8 md:w-10 md:h-10" />
             </div>
-            <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">
+            <h2 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white mb-2">
               Test Paused
             </h2>
-            <p className="text-zinc-500 dark:text-zinc-400 mb-8 font-mono">
+            <p className="text-sm md:text-base text-zinc-500 dark:text-zinc-400 mb-8 font-mono">
               The timer has been stopped. The questions are hidden.
             </p>
             <div className="space-y-3">
               <button
                 onClick={togglePause}
-                className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 text-white font-bold rounded-sm hover:bg-emerald-500 transition-all shadow-lg hover:shadow-emerald-500/25"
+                className="w-full flex items-center justify-center gap-2 px-8 py-3 md:py-4 bg-emerald-600 text-white font-bold rounded-sm hover:bg-emerald-500 transition-all shadow-lg hover:shadow-emerald-500/25"
               >
                 <PlayCircle className="w-5 h-5" /> RESUME TEST
               </button>
               <button
                 onClick={handleSubmit}
-                className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-white dark:bg-zinc-900 text-red-500 font-bold rounded-sm border border-red-200 dark:border-red-900/30 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-8 py-3 md:py-4 bg-white dark:bg-zinc-900 text-red-500 font-bold rounded-sm border border-red-200 dark:border-red-900/30 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
               >
                 <LogOut className="w-5 h-5" /> SUBMIT & EXIT
               </button>
@@ -364,33 +368,37 @@ export const TestRunner: React.FC = () => {
       )}
 
       {/* HEADER */}
-      <header className="h-14 bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 shrink-0 transition-colors duration-300">
-        <div className="flex items-center gap-3">
-          <div className="p-1.5 bg-zinc-900 text-white rounded-sm">
+      <header className="h-14 bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-3 md:px-4 shrink-0 transition-colors duration-300 z-20">
+        <div className="flex items-center gap-2 md:gap-3 overflow-hidden">
+          <div className="p-1.5 bg-zinc-900 text-white rounded-sm shrink-0">
             <Info className="w-4 h-4" />
           </div>
-          <h1 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 hidden md:block">
-            Bihar शिक्षक TRE 3.0 (Class 11-12) (Computer Science) Official Paper
-          </h1>
-          <h1 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 md:hidden">
-            TRE 3.0 Official Paper
+          <h1 className="text-xs md:text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">
+            <span className="md:hidden">TRE 3.0 (Comp Sci)</span>
+            <span className="hidden md:inline">
+              Bihar शिक्षक TRE 3.0 (Class 11-12) (Computer Science) Official
+              Paper
+            </span>
           </h1>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-900 px-3 py-1.5 rounded-sm">
-            <span className="text-xs font-bold text-zinc-500">Time Left</span>
+        <div className="flex items-center gap-2 md:gap-4 shrink-0">
+          <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-900 px-2 md:px-3 py-1.5 rounded-sm">
+            <span className="text-[10px] md:text-xs font-bold text-zinc-500 hidden sm:inline">
+              Time Left
+            </span>
+            <Clock className="w-3 h-3 text-zinc-500 sm:hidden" />
             <span
-              className={`font-mono text-base font-bold px-2 rounded ${timeLeft < 300 ? "bg-red-100 text-red-600 animate-pulse" : "bg-zinc-200 dark:bg-black text-zinc-900 dark:text-white"}`}
+              className={`font-mono text-sm md:text-base font-bold px-1 md:px-2 rounded ${timeLeft < 300 ? "bg-red-100 text-red-600 animate-pulse" : "bg-zinc-200 dark:bg-black text-zinc-900 dark:text-white"}`}
             >
               {formatTime(timeLeft)}
             </span>
           </div>
 
-          <div className="flex items-center gap-2 border-l border-zinc-200 dark:border-zinc-800 pl-4">
+          <div className="flex items-center gap-1 md:gap-2 border-l border-zinc-200 dark:border-zinc-800 pl-2 md:pl-4">
             <button
               onClick={toggleFullscreen}
-              className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded text-zinc-500 hover:text-emerald-500 transition-colors"
+              className="hidden sm:block p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded text-zinc-500 hover:text-emerald-500 transition-colors"
               title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
             >
               {isFullscreen ? (
@@ -411,8 +419,10 @@ export const TestRunner: React.FC = () => {
       </header>
 
       {/* SUB-HEADER / SECTIONS */}
-      <div className="h-10 bg-blue-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 flex items-center px-4 overflow-x-auto scrollbar-hide shrink-0 transition-colors duration-300">
-        <span className="text-xs font-bold text-zinc-500 mr-4">SECTIONS |</span>
+      <div className="h-10 bg-blue-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 flex items-center px-2 md:px-4 overflow-x-auto scrollbar-hide shrink-0 transition-colors duration-300 gap-2">
+        <span className="text-[10px] md:text-xs font-bold text-zinc-500 whitespace-nowrap">
+          SECTIONS |
+        </span>
         {SECTIONS.map((sec) => (
           <button
             key={sec}
@@ -421,7 +431,7 @@ export const TestRunner: React.FC = () => {
               setCurrentQIndex(0);
             }}
             className={`
-              h-full px-4 text-xs font-bold whitespace-nowrap border-b-2 transition-colors flex items-center
+              h-full px-3 md:px-4 text-[10px] md:text-xs font-bold whitespace-nowrap border-b-2 transition-colors flex items-center
               ${
                 currentSection === sec
                   ? "border-blue-600 bg-blue-600 text-white"
@@ -438,60 +448,62 @@ export const TestRunner: React.FC = () => {
       </div>
 
       {/* MAIN BODY (SPLIT VIEW) */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         {/* LEFT: QUESTION AREA */}
         <main
-          className={`flex-1 flex flex-col h-full overflow-hidden transition-all ${isSidebarOpen ? "mr-0" : "mr-0"}`}
+          className={`flex-1 flex flex-col h-full overflow-hidden transition-all duration-300 mr-0`}
         >
           {/* Question Header Strip */}
-          <div className="h-12 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 bg-white dark:bg-zinc-950 shrink-0 transition-colors duration-300">
-            <div className="flex items-center gap-4">
-              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                Question No. {currentQIndex + 1}
+          <div className="min-h-[3rem] border-b border-zinc-200 dark:border-zinc-800 flex flex-wrap items-center justify-between px-3 py-2 bg-white dark:bg-zinc-950 shrink-0 gap-2 transition-colors duration-300">
+            <div className="flex items-center gap-2 md:gap-4">
+              <h2 className="text-xs md:text-sm font-bold text-zinc-900 dark:text-zinc-100 whitespace-nowrap">
+                Q. {currentQIndex + 1}
               </h2>
-              <div className="hidden sm:flex items-center gap-2">
-                {activeQuestion.type === "COMPREHENSION" && (
-                  <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded border border-purple-200">
-                    COMPREHENSION
-                  </span>
-                )}
-              </div>
+              {activeQuestion.type === "COMPREHENSION" && (
+                <span className="hidden sm:inline-block text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded border border-purple-200 whitespace-nowrap">
+                  COMPREHENSION
+                </span>
+              )}
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1 text-xs">
-                <span className="font-bold text-zinc-500">Marks</span>
-                <span className="bg-emerald-100 text-emerald-700 px-1.5 rounded text-[10px] font-bold">
+            <div className="flex items-center gap-2 md:gap-4 ml-auto">
+              <div className="flex items-center gap-1 text-[10px] md:text-xs whitespace-nowrap">
+                <span className="font-bold text-zinc-500 hidden sm:inline">
+                  Marks
+                </span>
+                <span className="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold">
                   +{activeQuestion.positiveMarks}
                 </span>
-                <span className="bg-red-100 text-red-700 px-1.5 rounded text-[10px] font-bold">
+                <span className="bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-bold">
                   -{activeQuestion.negativeMarks}
                 </span>
               </div>
-              <div className="text-xs text-zinc-500 flex items-center gap-1">
+              <div className="text-[10px] md:text-xs text-zinc-500 hidden sm:flex items-center gap-1 whitespace-nowrap">
                 View in{" "}
                 <span className="font-bold text-zinc-900 dark:text-white border border-zinc-300 dark:border-zinc-700 px-1 rounded">
                   English ▾
                 </span>
               </div>
-              <button className="text-xs text-zinc-500 flex items-center gap-1 hover:text-red-500">
+              <button className="text-[10px] md:text-xs text-zinc-500 hidden sm:flex items-center gap-1 hover:text-red-500 whitespace-nowrap">
                 <AlertTriangle className="w-3 h-3" /> Report
               </button>
             </div>
           </div>
 
           {/* Question Content */}
-          <div className="flex-1 overflow-y-auto bg-white dark:bg-black p-4 flex flex-col md:flex-row gap-4 transition-colors duration-300">
+          <div className="flex-1 overflow-y-auto bg-white dark:bg-black p-3 md:p-4 flex flex-col md:flex-row gap-4 transition-colors duration-300">
             {/* Passage Panel (If Comprehension) */}
             {activeQuestion.type === "COMPREHENSION" &&
               activeQuestion.passage && (
-                <div className="md:w-1/2 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800 pr-0 md:pr-4 pb-4 md:pb-0">
-                  <h3 className="underline font-bold text-sm mb-3 text-zinc-800 dark:text-zinc-200">
+                <div className="md:w-1/2 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800 pr-0 md:pr-4 pb-4 md:pb-0 shrink-0">
+                  <h3 className="underline font-bold text-xs md:text-sm mb-2 text-zinc-800 dark:text-zinc-200">
                     Comprehension:
                   </h3>
-                  <p className="text-sm leading-relaxed text-zinc-800 dark:text-zinc-300 font-serif">
-                    {activeQuestion.passage}
-                  </p>
+                  <div className="p-3 bg-zinc-50 dark:bg-zinc-900 rounded-sm border border-zinc-100 dark:border-zinc-800 max-h-[200px] md:max-h-none overflow-y-auto">
+                    <p className="text-xs md:text-sm leading-relaxed text-zinc-800 dark:text-zinc-300 font-serif">
+                      {activeQuestion.passage}
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -499,10 +511,10 @@ export const TestRunner: React.FC = () => {
             <div
               className={`flex-1 ${activeQuestion.type === "COMPREHENSION" ? "" : "max-w-4xl mx-auto"}`}
             >
-              <h3 className="font-bold underline text-sm mb-2 text-zinc-800 dark:text-zinc-200">
+              <h3 className="font-bold underline text-xs md:text-sm mb-2 text-zinc-800 dark:text-zinc-200">
                 Question:
               </h3>
-              <p className="text-base font-medium text-zinc-900 dark:text-zinc-100 mb-6 leading-relaxed">
+              <p className="text-sm md:text-base font-medium text-zinc-900 dark:text-zinc-100 mb-6 leading-relaxed">
                 {activeQuestion.text}
               </p>
 
@@ -513,7 +525,7 @@ export const TestRunner: React.FC = () => {
                     <div
                       key={idx}
                       onClick={() => handleOptionSelect(idx)}
-                      className="flex items-start gap-3 cursor-pointer group"
+                      className="flex items-start gap-3 cursor-pointer group p-2 rounded-sm hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors"
                     >
                       <div
                         className={`
@@ -537,33 +549,38 @@ export const TestRunner: React.FC = () => {
             </div>
           </div>
 
-          {/* FOOTER ACTIONS */}
-          <footer className="h-16 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 px-4 flex items-center justify-between shrink-0 transition-colors duration-300">
-            <div className="flex gap-2">
+          {/* FOOTER ACTIONS - Mobile Optimized */}
+          <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-2 md:px-4 md:h-16 flex flex-col md:flex-row items-center justify-between gap-2 shrink-0 transition-colors duration-300 pb-safe">
+            {/* Secondary Actions */}
+            <div className="grid grid-cols-2 w-full md:w-auto gap-2">
               <button
                 onClick={handleMarkReviewAndNext}
-                className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-black text-xs font-bold text-zinc-700 dark:text-zinc-300 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                className="flex items-center justify-center gap-2 px-3 py-2.5 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-black text-[10px] md:text-xs font-bold text-zinc-700 dark:text-zinc-300 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors whitespace-nowrap"
               >
-                Mark for Review & Next
+                <Bookmark className="w-3 h-3 md:hidden" />
+                <span className="md:inline">Review & Next</span>
               </button>
               <button
                 onClick={handleClearResponse}
-                className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-black text-xs font-bold text-zinc-700 dark:text-zinc-300 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                className="flex items-center justify-center gap-2 px-3 py-2.5 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-black text-[10px] md:text-xs font-bold text-zinc-700 dark:text-zinc-300 rounded-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors whitespace-nowrap"
               >
-                Clear Response
+                <RotateCcw className="w-3 h-3 md:hidden" />
+                <span className="md:inline">Clear Response</span>
               </button>
             </div>
 
+            {/* Primary Action */}
             <button
               onClick={handleSaveAndNext}
-              className="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-sm hover:bg-blue-500 shadow-sm transition-colors"
+              className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 md:py-2 bg-blue-600 text-white text-sm font-bold rounded-sm hover:bg-blue-500 shadow-sm transition-colors whitespace-nowrap"
             >
+              <Save className="w-4 h-4 md:hidden" />
               Save & Next
             </button>
           </footer>
         </main>
 
-        {/* RIGHT: PALETTE SIDEBAR */}
+        {/* RIGHT: PALETTE SIDEBAR (Desktop) */}
         {isSidebarOpen && (
           <aside className="w-80 bg-blue-50/50 dark:bg-zinc-900/50 border-l border-zinc-200 dark:border-zinc-800 flex flex-col shrink-0 overflow-hidden hidden lg:flex transition-colors duration-300">
             {/* Profile Section */}
@@ -664,25 +681,25 @@ export const TestRunner: React.FC = () => {
 
         {/* Mobile Toggle for Palette */}
         <div
-          className={`fixed right-0 top-1/2 -translate-y-1/2 z-50 lg:hidden transition-transform ${isSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
+          className={`fixed right-0 top-1/2 -translate-y-1/2 z-40 lg:hidden transition-transform duration-300 ${isSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
         >
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="absolute -left-8 top-0 w-8 h-12 bg-blue-600 text-white flex items-center justify-center rounded-l-md shadow-lg"
+            className="absolute -left-10 top-0 w-10 h-14 bg-blue-600 text-white flex items-center justify-center rounded-l-md shadow-lg border-l border-t border-b border-white/20"
           >
             {isSidebarOpen ? (
-              <ChevronRight size={20} />
+              <ChevronRight size={24} />
             ) : (
-              <ChevronLeft size={20} />
+              <ChevronLeft size={24} />
             )}
           </button>
 
           {/* Mobile Drawer Content */}
-          <div className="w-72 h-[60vh] bg-white dark:bg-zinc-900 shadow-2xl border-l border-zinc-200 dark:border-zinc-800 overflow-y-auto flex flex-col">
-            <div className="p-4 font-bold border-b dark:border-zinc-800 dark:text-white">
+          <div className="w-72 h-[70vh] bg-white dark:bg-zinc-900 shadow-2xl border-l border-zinc-200 dark:border-zinc-800 overflow-y-auto flex flex-col rounded-l-sm">
+            <div className="p-4 font-bold border-b border-zinc-200 dark:border-zinc-800 dark:text-white bg-zinc-50 dark:bg-zinc-950">
               Question Palette
             </div>
-            <div className="p-4 grid grid-cols-5 gap-2 flex-1">
+            <div className="p-4 grid grid-cols-5 gap-2 flex-1 content-start">
               {sectionQuestions.map((q, idx) => (
                 <button
                   key={q.id}
@@ -690,18 +707,22 @@ export const TestRunner: React.FC = () => {
                     setCurrentQIndex(idx);
                     setIsSidebarOpen(false);
                   }}
-                  className={`w-10 h-10 flex items-center justify-center text-sm font-bold rounded-sm ${getStatusColor(questionStatus[q.id])}`}
+                  className={`
+                        w-10 h-10 flex items-center justify-center text-sm font-bold rounded-sm shadow-sm
+                        ${getStatusColor(questionStatus[q.id])}
+                        ${currentQIndex === idx ? "ring-2 ring-offset-1 ring-blue-500" : ""}
+                      `}
                 >
                   {idx + 1}
                 </button>
               ))}
             </div>
-            <div className="p-4 border-t dark:border-zinc-800">
+            <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
               <button
                 onClick={handleSubmit}
-                className="w-full bg-emerald-500 text-white py-2 rounded-sm font-bold"
+                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-sm font-bold transition-colors"
               >
-                Submit
+                Submit Test
               </button>
             </div>
           </div>
