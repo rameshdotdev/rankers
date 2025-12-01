@@ -1,3 +1,4 @@
+// vite.config.ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -9,7 +10,8 @@ export default defineConfig({
       "/api": {
         target: "https://rankers-backend.vercel.app",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, "/api"),
+        // optional:
+        // rewrite: (path) => path.replace(/^\/api/, "/api"),
       },
     },
   },
