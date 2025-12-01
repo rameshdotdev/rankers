@@ -5,15 +5,5 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  server: {
-    proxy: {
-      "/api": {
-        target: "https://rankers-backend.vercel.app",
-        changeOrigin: true,
-        // optional:
-        // rewrite: (path) => path.replace(/^\/api/, "/api"),
-      },
-    },
-  },
   plugins: [react(), tsconfigPaths(), tailwindcss()],
 });
