@@ -88,3 +88,15 @@ export type TabType =
   | "PRACTICE"
   | "ANALYTICS"
   | "SETTINGS";
+
+export interface UserResponse {
+  _id: string;
+  name: string;
+  email: string;
+  isAdmin: boolean;
+  avatar: string;
+  targets: any[]; // or specify the target structure if you know it
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+  __v: number;
+}

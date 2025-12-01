@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Terminal,
   Search,
@@ -21,6 +22,7 @@ import {
   useDevice,
   useHideOnScroll,
 } from "@/hooks/hooks";
+import { UserResponse } from "@/types";
 
 export const Navbar: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -71,21 +73,32 @@ export const Navbar: React.FC = () => {
         console.error("No user object returned from Firebase Auth");
         return;
       }
+      // console.log("Firebase User:", fbUser);
+      const response = await axios.post<UserResponse>(
+        "/api/v1/users/signInWithGoogle",
+        {
+          name: fbUser.displayName,
+          email: fbUser.email,
+          avatar: fbUser.photoURL,
+        }
+      );
+
+      const userData = response.data;
 
       dispatch(
         setUser({
-          id: fbUser.uid,
-          name: fbUser.displayName || "",
-          email: fbUser.email || "",
-          avatar: fbUser.photoURL || "",
-          selectedExams: [],
+          id: userData._id,
+          name: userData.name,
+          email: userData.email,
+          avatar: userData.avatar,
+          selectedExams: userData.targets || [],
         })
       );
 
       setIsLoginOpen(false);
       navigate("/dashboard");
     } catch (error) {
-      console.error("Could not sign in with Google", error);
+      console.error("Error during Google login:", error);
     }
   };
 
