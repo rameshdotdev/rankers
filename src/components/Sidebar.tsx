@@ -15,6 +15,7 @@ import SidebarItem from "./SidebarItem";
 import { selectActiveTab, setActiveTab } from "@/feature/tabs/tabSlice";
 import { useAppDispatch, useAppSelector, useHideOnScroll } from "@/hooks/hooks";
 import { TabType } from "@/types";
+import { api } from "@/utils/api";
 
 // Ordered list of main tabs (for keyboard navigation)
 const TABS: { id: TabType; icon: any; label: string; mobileLabel?: string }[] =
@@ -93,6 +94,15 @@ export default function Sidebar() {
     []
   );
 
+  const handleLogout = async () => {
+    try {
+      await api.post("/users/auth", { TYPE: "SIGNOUT" });
+      dispatch(logoutUser());
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <aside
       aria-label="Dashboard navigation"
@@ -116,30 +126,9 @@ export default function Sidebar() {
           />
         ))}
 
-        {/* SETTINGS tab as the last "tab" in the sequence for keyboard navigation */}
-        {/* <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "SETTINGS"}
-          aria-current={activeTab === "SETTINGS" ? "page" : undefined}
-          aria-label="CONFIG tab"
-          tabIndex={activeTab === "SETTINGS" ? 0 : -1}
-          ref={(el) => (itemRefs.current[TABS.length] = el)}
-          onKeyDown={(e) => handleItemKeyDown(e, TABS.length)}
-          onClick={() => dispatch(setActiveTab("SETTINGS"))}
-          className={`flex-1 md:flex-none flex items-center justify-center md:justify-start gap-3 px-4 py-3 rounded-sm transition-all font-mono text-sm whitespace-nowrap ${
-            activeTab === "SETTINGS"
-              ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-500 border border-emerald-200 dark:border-emerald-800"
-              : "hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-600 dark:text-zinc-400"
-          }`}
-        >
-          <UserCircle className="w-4 h-4 shrink-0" />
-          <span className="lg:inline font-mono text-sm">CONFIG</span>
-        </button> */}
-
         {/* Mobile Logout (not part of tablist) */}
         <button
-          onClick={() => dispatch(logoutUser())}
+          onClick={handleLogout}
           className="md:hidden flex-1 flex items-center justify-center gap-3 px-4 py-3 rounded-sm transition-all font-mono text-sm whitespace-nowrap text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
         >
           <LogOut className="w-4 h-4 shrink-0" />
@@ -162,7 +151,7 @@ export default function Sidebar() {
           </span>
         </button>
         <button
-          onClick={() => dispatch(logoutUser())}
+          onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:text-red-600 dark:hover:text-red-400 cursor-pointer transition-colors hover:bg-red-50 dark:hover:bg-red-950/20 rounded-sm"
         >
           <LogOut className="w-4 h-4 shrink-0" />

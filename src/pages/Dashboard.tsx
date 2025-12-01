@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { User, ExamCard, RecommendedItem } from "../types";
+import { useState } from "react";
+import { ExamCard, RecommendedItem } from "../types";
 import {
   Target,
   BookOpen,
@@ -11,8 +11,8 @@ import {
   Zap,
   BrainCircuit,
 } from "lucide-react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+
+import { getUser } from "@/utils/user";
 // Mock Data for Available Exams to Add
 const AVAILABLE_EXAMS: ExamCard[] = [
   {
@@ -150,9 +150,7 @@ const RECOMMENDATIONS: RecommendedItem[] = [
 ];
 
 export const Dashboard = () => {
-  const user = useSelector(
-    (state: { user: { currentUser: User } }) => state.user.currentUser
-  );
+  const user = getUser();
   const [activeTab, setActiveTab] = useState<
     "OVERVIEW" | "TARGETS" | "ANALYTICS"
   >("OVERVIEW");
@@ -174,12 +172,7 @@ export const Dashboard = () => {
   // If user has no exams selected, force the view to TARGETS to onboard them
   const isConfiguring =
     user?.selectedExams?.length === 0 || activeTab === "TARGETS";
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (!user) {
-      navigate("/");
-    }
-  }, [user, navigate]);
+
   return (
     <div>
       {/* Header */}

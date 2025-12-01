@@ -1,11 +1,21 @@
 import { Navbar } from "@/components/navbar";
 import Sidebar from "@/components/Sidebar";
+import { getUser } from "@/utils/user";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = getUser();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
   return (
     <div>
       <Navbar />

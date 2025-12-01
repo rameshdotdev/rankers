@@ -34,7 +34,7 @@ export const Navbar: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { isDesktop } = useDevice();
+  const { isDesktop, isTablet } = useDevice();
   const show = useHideOnScroll();
 
   // Decide when to show/hide navbar based on route + device + scroll
@@ -42,7 +42,7 @@ export const Navbar: React.FC = () => {
     // Homepage → always show
     if (location.pathname === "/") return true;
     // Desktop & NOT homepage → always show
-    if (isDesktop && location.pathname !== "/") return true;
+    if (isDesktop || (isTablet && location.pathname !== "/")) return true;
     // Otherwise → follow scroll behavior
     return show;
   }
@@ -65,23 +65,19 @@ export const Navbar: React.FC = () => {
     try {
       const provider = new GoogleAuthProvider();
       const auth = getAuth(app);
-
       const result = await signInWithPopup(auth, provider);
       const fbUser = result.user;
-
       if (!fbUser) {
         console.error("No user object returned from Firebase Auth");
         return;
       }
-
-      const response = await api.post<UserResponse>("/users/signInWithGoogle", {
+      const response = await api.post<UserResponse>("/users/auth", {
+        TYPE: "GOOGLE_SIGNIN",
         name: fbUser.displayName,
         email: fbUser.email,
         avatar: fbUser.photoURL,
       });
-
       const userData = response.data;
-
       dispatch(
         setUser({
           id: userData._id,
@@ -91,7 +87,6 @@ export const Navbar: React.FC = () => {
           selectedExams: userData.targets || [],
         })
       );
-
       setIsLoginOpen(false);
       navigate("/dashboard");
     } catch (error) {
