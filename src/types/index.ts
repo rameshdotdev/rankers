@@ -95,8 +95,10 @@ export interface UserResponse {
   email: string;
   isAdmin: boolean;
   avatar: string;
-  targets: any[]; // or specify the target structure if you know it
+  selectedExams: any[]; // or specify the target structure if you know it
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
   __v: number;
 }
+
+export type AppLanguage = "en" | "hi";

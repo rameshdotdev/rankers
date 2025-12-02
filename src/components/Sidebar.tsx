@@ -96,7 +96,7 @@ export default function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      await api.post("/users/auth", { TYPE: "SIGNOUT" });
+      await api.post("/users/signOut");
       dispatch(logoutUser());
     } catch (error) {
       console.error("Logout failed:", error);

@@ -13,7 +13,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toggleTheme } from "@/feature/theme/themeSlice";
 import { LoginDialog } from "./LoginDialog";
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "firebase/auth";
-import { app } from "../app/firebase";
+import { app } from "../config/firebase";
 import { setUser } from "@/feature/user/userSlice";
 import {
   useAppDispatch,
@@ -63,28 +63,28 @@ export const Navbar: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      const provider = new GoogleAuthProvider();
       const auth = getAuth(app);
-      const result = await signInWithPopup(auth, provider);
-      const fbUser = result.user;
-      if (!fbUser) {
+      const provider = new GoogleAuthProvider();
+      // 1️⃣ Sign in with Google (Firebase popup)
+      const { user } = await signInWithPopup(auth, provider);
+      if (!user) {
         console.error("No user object returned from Firebase Auth");
         return;
       }
-      const response = await api.post<UserResponse>("/users/auth", {
-        TYPE: "GOOGLE_SIGNIN",
-        name: fbUser.displayName,
-        email: fbUser.email,
-        avatar: fbUser.photoURL,
+      // 2️⃣ Get Firebase ID token (to verify on backend)
+      const idToken = await user.getIdToken();
+      // 3️⃣ Hit your backend auth endpoint
+      const { data } = await api.post<UserResponse>("/users/signIn", {
+        idToken,
       });
-      const userData = response.data;
+      // 4️⃣ Store user in Redux
       dispatch(
         setUser({
-          id: userData._id,
-          name: userData.name,
-          email: userData.email,
-          avatar: userData.avatar,
-          selectedExams: userData.targets || [],
+          id: data._id,
+          name: data.name,
+          email: data.email,
+          avatar: data.avatar,
+          selectedExams: data.selectedExams || [],
         })
       );
       setIsLoginOpen(false);
